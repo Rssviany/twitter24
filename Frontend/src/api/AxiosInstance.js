@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const axiosInstance=axios.create({
-    baseURL:'http://localhost:6868/',
+    baseURL:'https://twitter24-backend.onrender.com',
     withCredentials:true,
     headers:{
         'Content-Type':'application/json'
