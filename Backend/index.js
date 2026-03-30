@@ -12,23 +12,23 @@ import myStoreRouter from './routers/myStoreRoute.js';
 
 dotenv.config();
 
-const app=express();
+const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: "https://twitter24-backend.onrender.com",
+    origin: "https://twitter24frontend.vercel.app",
     credentials: true
 }));
 
 
 
-app.use('',loginRouter);
-app.use('',localRouter);
-app.use('',radiusRouter);
-app.use('',offerRouter);
-app.use('',jobRouter);
-app.use('',myStoreRouter);
+app.use('', loginRouter);
+app.use('', localRouter);
+app.use('', radiusRouter);
+app.use('', offerRouter);
+app.use('', jobRouter);
+app.use('', myStoreRouter);
 
 app.post('/test', (req, res) => {
     res.json({ message: "Test route working" });
@@ -36,20 +36,20 @@ app.post('/test', (req, res) => {
 
 
 
-const PORT=process.env.PORT || 6767
+const PORT = process.env.PORT || 6767
 
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.send("server is running");
 })
 
 mongoose
-       .connect(process.env.MONGOOSE_URI)
-       .then(()=>{
+    .connect(process.env.MONGOOSE_URI)
+    .then(() => {
         console.log('Mongoose Connected Successfully')
-        app.listen(PORT,()=>{
+        app.listen(PORT, () => {
             console.log(`Server Running on ${PORT}`)
         });
-       })
-       .catch((e)=>{
-        console.log(`Error while connecting to Mongoose`,e)
-       });
+    })
+    .catch((e) => {
+        console.log(`Error while connecting to Mongoose`, e)
+    });
