@@ -15,10 +15,12 @@ export const register = async (req, res) => {
 
         const existing = await User.findOne({ email });
         if (existing) return res.status(400).json({ message: 'User already registered.Please Login' });
-
+        const cleanNumber = number.replace(/\D/g, "");
         const hashedPassword = await bcrypt.hash(password, 10);
+
         const newUser = await User.create({
-            name, email, number,
+            name, email,
+            number: cleanNumber,
             password: hashedPassword
         });
         console.log(newUser);
@@ -31,34 +33,54 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const { number, password } = req.body
-        const user = await User.findOne({ number })
+        const { number, password } = req.body;
+
+        const cleanNumber = number.replace(/\D/g, ""); 
+        const cleanPassword = password.trim();
+
+
+        const user = await User.findOne({
+            $or: [
+                { number: cleanNumber },              
+                { number: Number(cleanNumber) }       
+            ]
+        });
 
         if (!user) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
-        const isMatch = await bcrypt.compare(password, user.password);
+
+        const isMatch = await bcrypt.compare(cleanPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
+
         const token = jwt.sign(
             { id: user._id },
             process.env.JWT_SECRET_KEY,
             { expiresIn: '7d' }
-        )
+        );
+
+       
+
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
-            sameSite: "None",
+            sameSite: 'None',
             maxAge: 7 * 24 * 60 * 60 * 1000
-        })
-        await res.json({ id: user._id, name: user.name, email: user.email })
+        });
+
+        res.json({
+            id: user._id,
+            name: user.name,
+            email: user.email
+        });
 
     } catch (error) {
+        console.log('Login error:', error);
         res.status(500).json({ message: 'Getting error while log-in' });
-        console.log('Getting error while log-in', error);
     }
-}
+};
 
 export const forgetPassword = async (req, res) => {
     try {
@@ -197,8 +219,8 @@ export const logoutUser = (req, res) => {
     try {
         res.cookie("token", "", {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "None",
             expires: new Date(0)
         });
 
